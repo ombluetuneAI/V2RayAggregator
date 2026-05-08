@@ -140,6 +140,7 @@ def eternity_convert(file, config, output, provider_file_enabled=True):
             #             'sg': sg_provider
         }
         print('Writing content to provider')
+        os.makedirs(provider_path, exist_ok=True)
         for key in providers_files.keys():
             provider_all = open(providers_files[key], 'w', encoding='utf-8')
             provider_all.write(eternity_providers[key])
