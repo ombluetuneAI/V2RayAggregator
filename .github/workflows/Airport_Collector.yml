@@ -9,6 +9,7 @@ on:
 jobs:
   main:
     name: Collect & SpeedTest & Filter
+    timeout-minutes: 120
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
