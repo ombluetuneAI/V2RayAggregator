@@ -39,16 +39,16 @@ jobs:
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          git pull origin master
+          git pull origin auto
           git add ./sub
-          git checkout master
+          git checkout auto
           # git add README.md
           # git add ./utils/Country.mmdb
           git commit -m "♻️ $(date '+%Y-%m-%d %H:%M:%S') Collected"
       - name: Push Changes
         uses: ad-m/github-push-action@master
         with:
-          branch: master
+          branch: auto
 
       - name: Run Lite Speedtest
         run: |
@@ -59,7 +59,7 @@ jobs:
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          git pull origin master
+          git pull origin auto
           git add EternityAir
           git add EternityAir.txt
           git add LogInfoAir.txt
@@ -70,7 +70,7 @@ jobs:
       - name: Push Change
         uses: ad-m/github-push-action@master
         with:
-          branch: master
+          branch: auto
 
       - name: Run Convertor & Formatter
         run: |
@@ -83,7 +83,7 @@ jobs:
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          git pull origin master
+          git pull origin auto
           git add EternityAir.yml
           git add ./update/*
           git add LogInfoAir.txt
@@ -93,4 +93,4 @@ jobs:
       - name: Push Change
         uses: ad-m/github-push-action@master
         with:
-          branch: master
+          branch: auto

@@ -38,7 +38,7 @@ jobs:
       run: |                 
         git config --local user.email "actions@github.com"
         git config --local user.name "GitHub Actions"
-        git pull origin master
+        git pull origin auto
         git add Eternity
         git add Eternity.yml
         git add README.md
@@ -49,4 +49,4 @@ jobs:
       uses:  ad-m/github-push-action@master
       with:
         # github_token: ${{ secrets.TOKEN }}
-        branch: master
+        branch: auto

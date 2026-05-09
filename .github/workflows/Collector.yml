@@ -61,16 +61,16 @@ jobs:
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          git pull origin master
+          git pull origin auto
           git add ./sub
           git add ./utils/Country.mmdb
           git add README.md
-          git checkout master
+          git checkout auto
           git commit -m "✔️ $(date '+%Y-%m-%d %H:%M:%S') Collected"
       - name: Push Changes
         uses: ad-m/github-push-action@master
         with:
-          branch: master
+          branch: auto
 
       - name: Run Lite Speedtest
         run: |
@@ -81,7 +81,7 @@ jobs:
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          git pull origin master
+          git pull origin auto
           git add EternityBase
           git add Eternity
           git add Eternity.txt
@@ -93,7 +93,7 @@ jobs:
       - name: Push Change
         uses: ad-m/github-push-action@master
         with:
-          branch: master
+          branch: auto
 
       - name: Run Convertor & Formatter
         run: |
@@ -106,7 +106,7 @@ jobs:
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          git pull origin master
+          git pull origin auto
           git add Eternity.yml
           git add Eternity
           git add README.md
@@ -117,4 +117,4 @@ jobs:
       - name: Push Change
         uses: ad-m/github-push-action@master
         with:
-          branch: master
+          branch: auto

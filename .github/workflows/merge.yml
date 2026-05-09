@@ -43,13 +43,13 @@ jobs:
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          git pull origin master
+          git pull origin auto
           git add ./sub
           git add ./utils/Country.mmdb
           git add README.md
-          git checkout master
+          git checkout auto
           git commit -m "$(date '+%Y-%m-%d %H:%M:%S') Update Nodes"
       - name: Push Changes
         uses: ad-m/github-push-action@master
         with:
-          branch: master
+          branch: auto
