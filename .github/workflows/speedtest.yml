@@ -3,14 +3,10 @@ name: speedtest
 # 触发条件
 on:
   workflow_dispatch:
-  
-  push:
-    paths:
-      - './sub/sub_merge_base64.txt'
-      
-  schedule:
-    - cron: '30 */8 * * *'
-  
+  # schedule disabled - tests mahdibland/SSAggregator instead of local data
+  # schedule:
+  # - cron: '30 */8 * * *'
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
