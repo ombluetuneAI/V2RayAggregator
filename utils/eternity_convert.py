@@ -1,6 +1,7 @@
 import re
 import yaml
 import json
+import base64
 import re
 import time
 import os
