@@ -26,6 +26,11 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install -r ./utils/requirements.txt
+      - name: Sync to auto branch
+        run: |
+          git fetch origin
+          git checkout auto
+          git reset --hard origin/auto
       - name: Run Ip Test
         run: |
           sudo sh ./utils/speedtest/ip_test.sh

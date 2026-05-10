@@ -29,7 +29,11 @@ jobs:
       - name: Install Requirements
         run: |
           pip install -r ./utils/requirements.txt
-
+      - name: Sync to auto branch
+        run: |
+          git fetch origin
+          git checkout auto
+          git reset --hard origin/auto
       - name: Running Collector
         run: |
           wget -O subconverter.tar.gz https://github.com/MetaCubeX/subconverter/releases/download/v0.9.2/subconverter_linux64.tar.gz
@@ -40,11 +44,7 @@ jobs:
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          git pull origin auto
           git add ./sub
-          git checkout auto
-          # git add README.md
-          # git add ./utils/Country.mmdb
           git commit -m "♻️ $(date '+%Y-%m-%d %H:%M:%S') Collected"
       - name: Push Changes
         uses: ad-m/github-push-action@master
@@ -60,13 +60,10 @@ jobs:
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          git pull origin auto
           git add EternityAir
           git add EternityAir.txt
           git add LogInfoAir.txt
           git add ./sub
-          # git add ./sub/airport_sub_merge.txt
-          # git add ./sub/airport_merge_base64.txt
           git commit -m "♻️ $(date '+%Y-%m-%d %H:%M:%S') Tested"
       - name: Push Change
         uses: ad-m/github-push-action@master
@@ -84,12 +81,9 @@ jobs:
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          git pull origin auto
           git add EternityAir.yml
           git add ./update/*
           git add LogInfoAir.txt
-          # git add Eternity
-          # git add README.md
           git commit -m "♻️ $(date '+%Y-%m-%d %H:%M:%S') Filtered"
       - name: Push Change
         uses: ad-m/github-push-action@master

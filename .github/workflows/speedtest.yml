@@ -30,16 +30,20 @@ jobs:
     - name: Install Dependencies
       run: |
         pip install -r ./utils/requirements.txt
+    - name: Sync to auto branch
+      run: |
+        git fetch origin
+        git checkout auto
+        git reset --hard origin/auto
     - name: Run Lite Speedtest
       run: |
         sudo sh ./utils/speedtest/speedtest2.sh
         python ./utils/speedtest/output.py
         python ./utils/eternity_convert.py
     - name: Commit changes
-      run: |                 
+      run: |
         git config --local user.email "actions@github.com"
         git config --local user.name "GitHub Actions"
-        git pull origin auto
         git add Eternity
         git add Eternity.yml
         git add README.md
