@@ -93,7 +93,7 @@ def output(data, num):
         config_str = item.get('config', '')
         link = config_to_link(config_str)
         if link:
-            ping = item.get('ping', 999)
+            ping = item.get('ping', 0)
             speed = item.get('speed', 0)
             avg_speed = item.get('avg_speed', speed)
             max_speed = item.get('max_speed', speed)
@@ -108,14 +108,15 @@ def output(data, num):
                 'protocol': item.get('type', '')
             })
 
-    nodes = sorted(nodes, key=lambda x: (x['avg_speed'], x['ping']), reverse=True)
-
+    working_nodes = [n for n in nodes if n['speed'] > 0 and n['ping'] > 0]
     print(f"Total nodes: {len(nodes)}")
-    working_nodes = [n for n in nodes if n['ping'] < 999]
-    print(f"Working nodes: {len(working_nodes)}")
-    if working_nodes:
-        print(f"Fastest: {working_nodes[0]['remarks']} - {working_nodes[0]['avg_speed']} KB/s")
-        print(f"Slowest: {working_nodes[-1]['remarks']} - {working_nodes[-1]['avg_speed']} KB/s")
+    print(f"Working nodes (speed > 0 and ping > 0): {len(working_nodes)}")
+
+    nodes = sorted(working_nodes, key=lambda x: (x['avg_speed'], x['ping']), reverse=True)
+
+    if nodes:
+        print(f"Fastest: {nodes[0]['remarks']} - {nodes[0]['avg_speed']} KB/s")
+        print(f"Slowest: {nodes[-1]['remarks']} - {nodes[-1]['avg_speed']} KB/s")
 
     output_list = []
     for item in nodes:
