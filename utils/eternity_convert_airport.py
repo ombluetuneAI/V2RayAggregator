@@ -76,13 +76,10 @@ def eternity_convert(file, config, output, provider_file_enabled=True):
     print(
         f"removed_bad_char count => {removed_bad_char.__len__()} & log_lines_without_bad_char count => {log_lines_without_bad_char.__len__()}")
 
-    # take a part from begining of all lines
-    num = 200
-    num = removed_bad_char.__len__() if removed_bad_char.__len__() <= num else num
+    num = min(removed_bad_char.__len__(), 200)
 
-    # remove zero speed lines
     removed_bad_char_without_zero = []
-    for (index, item) in enumerate(removed_bad_char[0:num + 1]):
+    for (index, item) in enumerate(removed_bad_char[0:num]):
         if log_lines_without_bad_char[index].__contains__("avg_speed: 0.0 MB") == False:
             removed_bad_char_without_zero.append(item)
 
