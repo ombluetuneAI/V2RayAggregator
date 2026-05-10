@@ -3,7 +3,7 @@
   "speedtestMode": "all",
   "pingUrl": "https://www.google.com/generate_204",
   "downloadUrl": "https://dl.google.com/go/Go1.22.3.windows-amd64.msi",
-  "filter": "all",
+  "filter": "",
   "pingMethod": "http",
   "sortMethod": "speed",
   "concurrency": 16,

@@ -108,15 +108,25 @@ def output(data, num):
                 'protocol': item.get('type', '')
             })
 
-    working_nodes = [n for n in nodes if n['speed'] > 0 and n['ping'] > 0]
+    nodes = sorted(nodes, key=lambda x: (x['avg_speed'], x['ping']), reverse=True)
+
     print(f"Total nodes: {len(nodes)}")
-    print(f"Working nodes (speed > 0 and ping > 0): {len(working_nodes)}")
 
-    nodes = sorted(working_nodes, key=lambda x: (x['avg_speed'], x['ping']), reverse=True)
+    speed_only_nodes = [n for n in nodes if n['speed'] > 0 and n['ping'] == 0]
+    ping_only_nodes = [n for n in nodes if n['ping'] > 0 and n['speed'] == 0]
+    both_nodes = [n for n in nodes if n['speed'] > 0 and n['ping'] > 0]
+    neither_nodes = [n for n in nodes if n['speed'] == 0 and n['ping'] == 0]
 
-    if nodes:
-        print(f"Fastest: {nodes[0]['remarks']} - {nodes[0]['avg_speed']} KB/s")
-        print(f"Slowest: {nodes[-1]['remarks']} - {nodes[-1]['avg_speed']} KB/s")
+    print(f"  - speed > 0 only (no ping): {len(speed_only_nodes)}")
+    print(f"  - ping > 0 only (no speed): {len(ping_only_nodes)}")
+    print(f"  - both speed > 0 and ping > 0: {len(both_nodes)}")
+    print(f"  - neither speed nor ping: {len(neither_nodes)}")
+
+    working_nodes = [n for n in nodes if n['speed'] > 0 and n['ping'] > 0]
+    print(f"Working nodes (speed > 0 AND ping > 0): {len(working_nodes)}")
+    if working_nodes:
+        print(f"Fastest: {working_nodes[0]['remarks']} - {working_nodes[0]['avg_speed']} KB/s")
+        print(f"Slowest: {working_nodes[-1]['remarks']} - {working_nodes[-1]['avg_speed']} KB/s")
 
     output_list = []
     for item in nodes:

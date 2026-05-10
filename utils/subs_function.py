@@ -9,6 +9,11 @@ import geoip2.database
 
 class subs_function:
     def convert_sub(url: str, output: str, convertor_host="http://0.0.0.0:25500", show_url=False, extra_options=""):
+        if url.startswith('./') or url.startswith('/') or 'sub_merge_base64.txt' in url:
+            with open(url, 'r', encoding='utf-8') as f:
+                content = f.read()
+                decoded = base64.b64decode(content).decode('utf-8')
+                return decoded
         url = urllib.parse.quote(url, safe='')
         try:
             convert_url = f'{convertor_host}/sub?target={output}&url={url}&insert=false&emoji=true&list=true&tfo=false&scv=false&fdn=false&sort=false{extra_options}'
