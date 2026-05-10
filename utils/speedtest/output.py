@@ -94,9 +94,9 @@ def output(data, num):
         link = config_to_link(config_str)
         if link:
             ping = item.get('ping', 0)
-            speed = item.get('speed', 0)
-            avg_speed = item.get('avg_speed', speed)
-            max_speed = item.get('max_speed', speed)
+            avg_speed = item.get('avg_speed', 0)
+            max_speed = item.get('max_speed', 0)
+            speed = avg_speed
             nodes.append({
                 'id': idx,
                 'link': link,
