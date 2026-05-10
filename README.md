@@ -14,7 +14,7 @@ The automation functions of this repository are all implemented based on `GitHub
 
 Test the speed of each free node pool on the network and the nodes shared by bloggers to screen out relatively stable and high-speed nodes, and then import them into the warehouse for sharing records.
 
-The speed measurement function is implemented in the `GitHub Actions` environment using [LiteSpeedTest](https://github.com/xxf098/LiteSpeedTest), so there are many nodes in the United States, which cannot well represent the node availability in the domestic network environment.
+The speed measurement function is implemented in the `GitHub Actions` environment using [SingTools](https://github.com/Kdwkakcs/singtools), so there are many nodes in the United States, which cannot well represent the node availability in the domestic network environment.
 
 ## Features
 - Lots of sources 😯

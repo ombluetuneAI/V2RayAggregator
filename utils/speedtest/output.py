@@ -3,7 +3,7 @@ import base64
 import os
 import time
 
-out_json = './out.json'
+meta_json = './meta.json'
 
 sub_all_base64 = "./sub/sub_merge_base64.txt"
 sub_all = "./sub/sub_merge.txt"
@@ -14,94 +14,174 @@ Eternity_Base = "./EternityBase"
 splitted_output = "./sub/splitted/"
 
 
-def read_json(file):  # 将 out.json 内容读取为列表
+def read_meta(file):
     while os.path.isfile(file) == False:
-        # log
-        #file_list = os.listdir("./")
-        #print(file_list)
         print('Awaiting speedtest complete')
         time.sleep(30)
     with open(file, 'r', encoding='utf-8') as f:
-        print('Reading out.json')
-        proxies_all = json.load(f)["nodes"]
+        print('Reading meta.json')
+        data = json.load(f)
         f.close()
-    return proxies_all
+    return data
 
 
-def output(list, num):
-    # sort base their avg speed rather than max speed which is default option
-    list = sorted(list, key=lambda x: x['avg_speed'], reverse=True)
+def config_to_link(config_str):
+    try:
+        config = json.loads(config_str)
+    except:
+        return None
 
-    # log
-    print(list[0])
-    print(list[-1])
+    protocol = config.get('type', '')
+    tag = config.get('tag', '').split(' ')[0] if ' ' in config.get('tag', '') else config.get('tag', '')
+    server = config.get('server', '')
+    port = config.get('server_port', 0)
 
-    def arred(x, n): return x*(10**n)//1/(10**n)
-    print(str(list[0]))
+    if protocol == 'vmess':
+        uuid = config.get('uuid', '')
+        security = config.get('security', 'auto')
+        transport = config.get('transport', {})
+        network = transport.get('type', 'tcp') if isinstance(transport, dict) else 'tcp'
+
+        path = ''
+        host = ''
+        if network == 'ws' and isinstance(transport, dict):
+            path = transport.get('path', '')
+            headers = transport.get('headers', {})
+            host = headers.get('Host', '') if isinstance(headers, dict) else ''
+
+        tls = config.get('tls', {})
+        tls_enabled = tls.get('enabled', False) if isinstance(tls, dict) else False
+
+        vmess_config = {
+            "v": "2",
+            "ps": tag,
+            "add": server,
+            "port": port,
+            "id": uuid,
+            "aid": 0,
+            "net": network,
+            "type": "none",
+            "host": host,
+            "path": path,
+            "tls": 'tls' if tls_enabled else ''
+        }
+        link = "vmess://" + base64.b64encode(json.dumps(vmess_config, ensure_ascii=False).encode('utf-8')).decode('ascii')
+        return link
+
+    elif protocol == 'trojan':
+        password = config.get('password', '')
+        tls = config.get('tls', {})
+        sni = ''
+        if isinstance(tls, dict):
+            sni = tls.get('serverName', '')
+        return f"trojan://{password}@{server}:{port}?sni={sni}#{tag}"
+
+    elif protocol == 'shadowsocks':
+        method = config.get('method', 'aes-256-gcm')
+        password = config.get('password', '')
+        return f"ss://{base64.b64encode(f'{method}:{password}'.encode()).decode()}@{server}:{port}#{tag}"
+
+    elif protocol == 'shadowsocksr':
+        return None
+
+    return None
+
+
+def output(data, num):
+    nodes = []
+    for idx, item in enumerate(data):
+        config_str = item.get('config', '')
+        link = config_to_link(config_str)
+        if link:
+            ping = item.get('ping', 999)
+            speed = item.get('speed', 0)
+            avg_speed = item.get('avg_speed', speed)
+            max_speed = item.get('max_speed', speed)
+            nodes.append({
+                'id': idx,
+                'link': link,
+                'ping': ping,
+                'speed': speed,
+                'avg_speed': avg_speed,
+                'max_speed': max_speed,
+                'remarks': item.get('tag', '').split(' ')[0] if ' ' in item.get('tag', '') else item.get('tag', ''),
+                'protocol': item.get('type', '')
+            })
+
+    nodes = sorted(nodes, key=lambda x: (x['avg_speed'], x['ping']), reverse=True)
+
+    print(f"Total nodes: {len(nodes)}")
+    working_nodes = [n for n in nodes if n['ping'] < 999]
+    print(f"Working nodes: {len(working_nodes)}")
+    if working_nodes:
+        print(f"Fastest: {working_nodes[0]['remarks']} - {working_nodes[0]['avg_speed']} KB/s")
+        print(f"Slowest: {working_nodes[-1]['remarks']} - {working_nodes[-1]['avg_speed']} KB/s")
+
     output_list = []
-    for item in list:
-        info = "id: %s | remarks: %s | protocol: %s | ping: %s MS | avg_speed: %s MB | max_speed: %s MB | Link: %s\n" % (str(item["id"]), item["remarks"], item["protocol"], str(
-            item["ping"]), str(arred(item["avg_speed"] * 0.00000095367432, 3)), str(arred(item["max_speed"] * 0.00000095367432, 3)), item["link"])
-        output_list.append(info)
-    with open('./LogInfo.txt', 'w') as f1:
-        f1.writelines(output_list)
+    for item in nodes:
+        output_list.append(item['link'])
+
+    def arred(x, n):
+        return x * (10 ** n) // 1 / (10 ** n)
+
+    info_list = []
+    for item in nodes:
+        avg_speed_mb = arred(item['avg_speed'] * 0.00000095367432, 3)
+        max_speed_mb = arred(item['max_speed'] * 0.00000095367432, 3)
+        info = f"id: {item['id']} | remarks: {item['remarks']} | protocol: {item['protocol']} | ping: {item['ping']} MS | avg_speed: {avg_speed_mb} MB | max_speed: {max_speed_mb} MB | Link: {item['link']}\n"
+        info_list.append(info)
+    with open('./LogInfo.txt', 'w', encoding='utf-8') as f1:
+        f1.writelines(info_list)
         f1.close()
         print('Write Log Success!')
 
-    output_list = []
-    for index in range(list.__len__()):
-        proxy = list[index]['link']
-        output_list.append(proxy)
-
-    # writing content as mixed and base64
     content = '\n'.join(output_list)
-    content_base64 = base64.b64encode(
-        '\n'.join(output_list).encode('utf-8')).decode('ascii')
-    content_base64_part = base64.b64encode(
-        '\n'.join(output_list[0:num]).encode('utf-8')).decode('ascii')
+    content_base64 = base64.b64encode('\n'.join(output_list).encode('utf-8')).decode('ascii')
+    content_base64_part = base64.b64encode('\n'.join(output_list[0:num]).encode('utf-8')).decode('ascii')
 
-    # spliting different protocols
     os.makedirs(splitted_output, exist_ok=True)
     vmess_outputs = []
     trojan_outputs = []
     ssr_outputs = []
     ss_outputs = []
+    vless_outputs = []
 
-    for output in output_list:
-        if str(output).startswith("vmess://"):
-            vmess_outputs.append(output)
-        if str(output).startswith("trojan://"):
-            trojan_outputs.append(output)
-        if str(output).startswith("ssr://"):
-            ssr_outputs.append(output)
-        if str(output).startswith("ss://"):
-            ss_outputs.append(output)
+    for output_item in output_list:
+        if str(output_item).startswith("vmess://"):
+            vmess_outputs.append(output_item)
+        if str(output_item).startswith("trojan://"):
+            trojan_outputs.append(output_item)
+        if str(output_item).startswith("ssr://"):
+            ssr_outputs.append(output_item)
+        if str(output_item).startswith("ss://"):
+            ss_outputs.append(output_item)
+        if str(output_item).startswith("vless://"):
+            vless_outputs.append(output_item)
 
-    with open(splitted_output.__add__("vmess.txt"), 'w') as f:
-        vmess_content = "\n".join(vmess_outputs)
-        f.write(vmess_content)
+    with open(splitted_output.__add__("vmess.txt"), 'w', encoding='utf-8') as f:
+        f.write("\n".join(vmess_outputs))
         print('Write vmess splitted Success!')
         f.close()
 
-    with open(splitted_output.__add__("trojan.txt"), 'w') as f:
-        trojan_content = "\n".join(trojan_outputs)
-        f.write(trojan_content)
+    with open(splitted_output.__add__("trojan.txt"), 'w', encoding='utf-8') as f:
+        f.write("\n".join(trojan_outputs))
         print('Write trojan splitted Success!')
         f.close()
 
-    with open(splitted_output.__add__("ssr.txt"), 'w') as f:
-        ssr_content = "\n".join(ssr_outputs)
-        f.write(ssr_content)
+    with open(splitted_output.__add__("ssr.txt"), 'w', encoding='utf-8') as f:
+        f.write("\n".join(ssr_outputs))
         print('Write ssr splitted Success!')
         f.close()
 
-    with open(splitted_output.__add__("ss.txt"), 'w') as f:
-        ss_content = "\n".join(ss_outputs)
-        f.write(ss_content)
+    with open(splitted_output.__add__("ss.txt"), 'w', encoding='utf-8') as f:
+        f.write("\n".join(ss_outputs))
         print('Write ss splitted Success!')
         f.close()
 
-    ##################
+    with open(splitted_output.__add__("vless.txt"), 'w', encoding='utf-8') as f:
+        f.write("\n".join(vless_outputs))
+        print('Write vless splitted Success!')
+        f.close()
 
     with open(sub_all_base64, 'w+', encoding='utf-8') as f:
         f.write(content_base64)
@@ -112,15 +192,15 @@ def output(list, num):
         print('Write Part Base64 Success!')
         f.close()
 
-    with open(sub_all, 'w') as f:
+    with open(sub_all, 'w', encoding='utf-8') as f:
         f.write(content)
         print('Write All Success!')
         f.close()
-    with open(Eternity_Base, 'w') as f:
+    with open(Eternity_Base, 'w', encoding='utf-8') as f:
         f.write(content)
         print('Write Base Success!')
         f.close()
-    with open(Eternity_file, 'w') as f:
+    with open(Eternity_file, 'w', encoding='utf-8') as f:
         f.write('\n'.join(output_list[0:num]))
         print('Write Part Base Success!')
         f.close()
@@ -129,5 +209,6 @@ def output(list, num):
 
 if __name__ == '__main__':
     num = 200
-    value = read_json(out_json)
-    output(value, value.__len__() if value.__len__() <= num else num)
+    value = read_meta(meta_json)
+    value_len = len(value) if isinstance(value, list) else 0
+    output(value, value_len if value_len <= num else num)
