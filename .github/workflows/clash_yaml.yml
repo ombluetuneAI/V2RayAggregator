@@ -4,12 +4,12 @@ name: clash_yaml
 on:
   workflow_dispatch:
 
-  push:
-    paths:
-      - "./EternityBase"
+  # push:
+  #   paths:
+  #     - "./EternityBase"
 
-  schedule:
-    - cron: "45 2,14 * * *"
+  # schedule:
+  #   - cron: "45 2,14 * * *"
 
 jobs:
   deploy:
@@ -45,7 +45,7 @@ jobs:
           tar -zxvf subconverter.tar.gz -C ./
           chmod +x ./subconverter/subconverter && nohup ./subconverter/subconverter >./subconverter.log 2>&1 &
           python ./utils/eternity_convert.py
-      - name: Commit changes
+      - name: Commit and Push
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
@@ -55,8 +55,4 @@ jobs:
           git add ./update/*
           git add LogInfo.txt
           git commit -m "$(date '+%Y-%m-%d %H:%M:%S') Filter Nodes"
-      - name: Push Change
-        uses: ad-m/github-push-action@master
-        with:
-          # github_token: ${{ secrets.TOKEN }}
-          branch: auto
+          git push origin auto

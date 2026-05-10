@@ -4,13 +4,13 @@ name: speedtest_yaml
 on:
   workflow_dispatch:
 
-  push:
-    paths:
-      - "./sub/sub_merge_base64.txt"
-      - "./sub/sub_merge_yaml.yml"
+  # push:
+  #   paths:
+  #     - "./sub/sub_merge_base64.txt"
+  #     - "./sub/sub_merge_yaml.yml"
 
-  schedule:
-    - cron: "15 1,13 * * *"
+  # schedule:
+  #   - cron: "15 1,13 * * *"
 
 jobs:
   deploy:
@@ -44,7 +44,7 @@ jobs:
         run: |
           sudo sh ./utils/speedtest/speedtest2_yamlc.sh
           python ./utils/speedtest/output.py
-      - name: Commit changes
+      - name: Commit and Push
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
@@ -55,8 +55,4 @@ jobs:
           git add ./sub/sub_merge_base64.txt
           git add LogInfo.txt
           git commit -m "$(date '+%Y-%m-%d %H:%M:%S') Filter Nodes"
-      - name: Push Change
-        uses: ad-m/github-push-action@master
-        with:
-          # github_token: ${{ secrets.TOKEN }}
-          branch: auto
+          git push origin auto

@@ -62,7 +62,7 @@ jobs:
           node ./utils/localserver/index.js &
           sleep 2
           python ./utils/list_merge.py
-      - name: Commit Changes
+      - name: Commit and Push
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
@@ -70,17 +70,14 @@ jobs:
           git add ./utils/Country.mmdb
           git add README.md
           git commit -m "✔️ $(date '+%Y-%m-%d %H:%M:%S') Collected"
-      - name: Push Changes
-        uses: ad-m/github-push-action@master
-        with:
-          branch: auto
+          git push origin auto
 
       - name: Run Lite Speedtest
         run: |
           sleep 5
           sudo sh ./utils/speedtest/speedtest2_yaml.sh
           python ./utils/speedtest/output.py
-      - name: Commit changes
+      - name: Commit and Push
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
@@ -92,10 +89,7 @@ jobs:
           git add LogInfo.txt
           git add ./sub/splitted/*
           git commit -m "✔️ $(date '+%Y-%m-%d %H:%M:%S') Tested"
-      - name: Push Change
-        uses: ad-m/github-push-action@master
-        with:
-          branch: auto
+          git push origin auto
 
       - name: Run Convertor & Formatter
         run: |
@@ -104,7 +98,7 @@ jobs:
           tar -zxvf subconverter.tar.gz -C ./
           chmod +x ./subconverter/subconverter && nohup ./subconverter/subconverter >./subconverter.log 2>&1 &
           python ./utils/eternity_convert.py
-      - name: Commit changes
+      - name: Commit and Push
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
@@ -114,7 +108,4 @@ jobs:
           git add ./update/*
           git add LogInfo.txt
           git commit -m "✔️ $(date '+%Y-%m-%d %H:%M:%S') Filtered"
-      - name: Push Change
-        uses: ad-m/github-push-action@master
-        with:
-          branch: auto
+          git push origin auto
