@@ -3,4 +3,4 @@ wget -O singtools.tar.gz https://github.com/Kdwkakcs/singtools/releases/download
 tar -zxvf singtools.tar.gz
 chmod +x ./singtools
 #运行 SingTools 测试
-./singtools test -i ./sub/airport_merge_yaml.yml -c ./utils/speedtest/singtools_config.json -o out.json
+./singtools test -i ./sub/airport_merge_yaml.yml -c ./utils/speedtest/singtools_config.json -o out.json -f ""
