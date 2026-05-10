@@ -42,10 +42,25 @@ def substrings(string, left, right):
 
 
 def eternity_convert(file, config, output, provider_file_enabled=True):
-    # # no conversion from base64 so udp is not a problem
-    # subconvertor not working with only proxy url
-    all_provider = subs_function.convert_sub(
-        "./sub/sub_merge_base64.txt", 'clash', "http://0.0.0.0:25500", False, extra_options="&udp=false")
+    with open(file, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    if content.startswith('ss://') or content.startswith('vmess://') or content.startswith('trojan://') or content.startswith('vless://'):
+        temp_file = './temp_eternity_links.txt'
+        with open(temp_file, 'w', encoding='utf-8') as tf:
+            tf.write(content)
+        all_provider = subs_function.convert_sub(temp_file, 'clash', "http://0.0.0.0:25500", False, extra_options="&udp=false")
+        os.remove(temp_file)
+    else:
+        decoded = base64.b64decode(content).decode('utf-8')
+        if decoded.startswith('ss://') or decoded.startswith('vmess://') or decoded.startswith('trojan://') or decoded.startswith('vless://'):
+            temp_file = './temp_eternity_links.txt'
+            with open(temp_file, 'w', encoding='utf-8') as tf:
+                tf.write(decoded)
+            all_provider = subs_function.convert_sub(temp_file, 'clash', "http://0.0.0.0:25500", False, extra_options="&udp=false")
+            os.remove(temp_file)
+        else:
+            all_provider = decoded
 
     ##########   Add Name to Logs Before making chaages to Proxies  ############
     temp_providers = all_provider.split('\n')
