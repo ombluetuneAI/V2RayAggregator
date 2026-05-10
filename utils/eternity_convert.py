@@ -54,7 +54,9 @@ def eternity_convert(file, config, output, provider_file_enabled=True):
     log_reader.close()
     indexx = 0
     for line in temp_providers:
-        if line != 'proxies:':
+        if indexx >= len(log_lines):
+            break
+        if line.strip() and line != 'proxies:':
             try:
                 #####
                 server_name = substrings(line, "name:", ",")
@@ -62,9 +64,9 @@ def eternity_convert(file, config, output, provider_file_enabled=True):
                 log_lines[indexx] = "name: %s | type: %s | %s" % (
                     server_name, server_type, log_lines[indexx])
                 #####
-                indexx += 1
-            except:
-                print("log lines length != providers length")
+            except Exception as e:
+                print("log lines length != providers length at index %d: %s" % (indexx, str(e)))
+        indexx += 1
 
     log_writer = open(log_file, 'w')
     log_writer.writelines(log_lines)
@@ -99,29 +101,34 @@ def eternity_convert(file, config, output, provider_file_enabled=True):
     skip_names_index = []
     for line in lines:
         if line != 'proxies:':
+            speed = "N/A"
             try:
                 name = substrings(line, "name:", ",")
-                speed = substrings(
-                    log_lines_without_bad_char[indexx], "avg_speed:", "|")
+                log_line = log_lines_without_bad_char[indexx] if indexx < len(log_lines_without_bad_char) else ""
+                if "avg_speed:" in log_line and "|" in log_line:
+                    speed = substrings(log_line, "avg_speed:", "|")
+                else:
+                    print(f"Warning: Cannot parse speed from log line {indexx}: {log_line[:100]}...")
                 line = re.sub("name:( |)(.*?),", "name: %s | %s," %
                               (name, speed), line)
-            except:
-                print(log_lines_without_bad_char[indexx])
-                pass
-            #           line = '  ' + line
+            except Exception as e:
+                print(f"Warning: Error parsing line {indexx}: {e}, log: {log_line[:100] if 'log_line' in dir() else 'N/A'}")
             line = line.replace('- ', '')
-            line_parsed = yaml.safe_load(line)
-            if "password" in line_parsed:
-                line_parsed.update({"password": str(line_parsed.get("password"))})
-                # interpreted as a floating-point number
-                if re.match(r'^\d+\.?\d*[eE][-+]?\d+$', line_parsed["password"]):
-                    skip_names_index.append(indexx)
+            try:
+                line_parsed = yaml.safe_load(line)
+                if line_parsed is None:
                     indexx += 1
                     continue
-                
-            linee = line_parsed
-            proxy_all.append(linee)
-
+                if "password" in line_parsed:
+                    line_parsed.update({"password": str(line_parsed.get("password"))})
+                    if re.match(r'^\d+\.?\d*[eE][-+]?\d+$', str(line_parsed.get("password", ""))):
+                        skip_names_index.append(indexx)
+                        indexx += 1
+                        continue
+                linee = line_parsed
+                proxy_all.append(linee)
+            except Exception as e:
+                print(f"Warning: Error parsing YAML at index {indexx}: {e}, line: {line[:100]}...")
             indexx += 1
 
     if provider_file_enabled:
@@ -192,13 +199,15 @@ def eternity_convert(file, config, output, provider_file_enabled=True):
                     indexx += 1 
                     continue
                 try:
-                    speed = substrings(
-                        log_lines_without_bad_char[indexx], "avg_speed:", "|")
-                    name_dict[key].append(
-                        str(proxy['name']).replace(" ", "") + " | " + speed)
-                except:
+                    log_line = log_lines_without_bad_char[indexx] if indexx < len(log_lines_without_bad_char) else ""
+                    if "avg_speed:" in log_line and "|" in log_line:
+                        speed = substrings(log_line, "avg_speed:", "|")
+                        name_dict[key].append(str(proxy['name']).replace(" ", "") + " | " + speed)
+                    else:
+                        name_dict[key].append(str(proxy['name']).replace(" ", ""))
+                except Exception as e:
                     name_dict[key].append(str(proxy['name']).replace(" ", ""))
-                    print(log_lines_without_bad_char[indexx])
+                    print(f"Warning: Error appending name at index {indexx}: {e}")
 
                 indexx += 1
 
